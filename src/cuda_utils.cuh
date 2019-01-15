@@ -1,33 +1,48 @@
-#ifndef CUDA_UTILS_HPP
-#define CUDA_UTILS_HPP
+#ifndef CUDA_UTILS_CUH
+#define CUDA_UTILS_CUH
+
+#include <GL/freeglut.h>
 
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <iostream>
 
-#define cudaCheckRet(ans)                                                      \
-  { _cuda_check_ret((ans), __FILE__, __LINE__); }
-inline void _cuda_check_ret(cudaError_t code, const char *file, int line,
-                            bool abort = true) {
+#define cudaCheckRet(ans) _cuda_check_ret((ans), __FILE__, __LINE__)
+inline cudaError_t _cuda_check_ret(cudaError_t code, const char *file, int line,
+                                   bool abort = false) {
   if (code != cudaSuccess) {
     std::cerr << "cudaCheckRet() failed at: " << file << ":" << line << ": "
-              << cudaGetErrorString(code) << "\n";
+              << cudaGetErrorString(code) << std::endl;
     if (abort) {
       exit(code);
     }
   }
+  return code;
 }
-#define cudaCheckError()                                                       \
-  { _cuda_check_error(__FILE__, __LINE__); }
-inline void _cuda_check_error(const char *file, const int line) {
-  cudaError code = cudaGetLastError();
+#define cudaCheckError() _cuda_check_error(__FILE__, __LINE__)
+inline cudaError_t _cuda_check_error(const char *file, const int line,
+                                     bool abort = false) {
+  cudaError_t code = cudaGetLastError();
   if (code != cudaSuccess) {
     std::cerr << "cudaCheckError() failed at: " << file << ":" << line << ": "
-              << cudaGetErrorString(code) << "\n";
-    exit(-1);
+              << cudaGetErrorString(code) << std::endl;
+    if (abort) {
+      exit(code);
+    }
   }
+  return code;
 }
 
-cudaDeviceProp cudaDevicePropertries(int device = 0);
+namespace cuda_info {
+cudaDeviceProp devicePropertries(int device = 0);
+bool deviceIsPresent();
+} // namespace cuda_info
 
-#endif // CUDA_UTILS_HPP
+namespace cuda_gl {
+cudaGraphicsResource *registerBuffer(GLuint buf);
+void unregisterBuffer(cudaGraphicsResource *res);
+void *map(cudaGraphicsResource *res);
+void unmap(cudaGraphicsResource *res);
+} // namespace cuda_gl
+
+#endif // CUDA_UTILS_CUH

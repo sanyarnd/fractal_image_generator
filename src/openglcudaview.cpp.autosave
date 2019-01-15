@@ -16,7 +16,11 @@ OpenGLCudaView::OpenGLCudaView(QWidget *parent)
 
 OpenGLCudaView::~OpenGLCudaView() {}
 
-void OpenGLCudaView::initializeGL() { initializeOpenGLFunctions(); }
+void OpenGLCudaView::initializeGL() {
+    initializeOpenGLFunctions();
+    _pix_buf = new QOpenGLBuffer(QOpenGLBuffer::PixelUnpackBuffer);
+    _pix_buf->create();
+}
 
 void OpenGLCudaView::resizeGL(int w, int h) { qDebug() << "Resize"; }
 

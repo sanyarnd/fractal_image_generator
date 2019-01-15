@@ -8,6 +8,7 @@ This program implements the following algorithm (see [[1]](paper/flame_draves.pd
 The program is tested to compile with the following toolchains:
 * `MSVC 19.16.27025.1`
 * `GCC 8.2`
+* `Clang 7.0.1`
 
 Program uses the following third party libraries and utilities:
 * `CMake 3.10.2` or higher **[external]**

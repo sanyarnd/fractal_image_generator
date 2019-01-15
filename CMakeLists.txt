@@ -21,10 +21,10 @@ find_package(GLEW REQUIRED QUIET)
 find_package(OpenCV 4.0.1 REQUIRED QUIET)
 find_package(Qt5 5.12 COMPONENTS Widgets OpenGL REQUIRED QUIET)
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
+#set(CMAKE_AUTOUIC ON)
+#set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_SOURCE_DIR}/ui")
+#set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_SOURCE_DIR}/ui")
 
 
 add_executable(${PROJECT_NAME}
@@ -36,15 +36,21 @@ add_executable(${PROJECT_NAME}
     src/openglcudaview.hpp
     src/openglcudaview.cpp
 
-    src/resolutionmodel.hpp
-    src/resolutionmodel.cpp
+    src/image.hpp
+    src/image.cpp
 
-    src/variation.hpp
-    src/variation.cpp
+#    src/resolutionmodel.hpp
+#    src/resolutionmodel.cpp
+
+#    src/variation.hpp
+#    src/variation.cpp
 
     src/cuda_utils.cuh
     src/cuda_utils.cu
 )
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set_property(TARGET main PROPERTY WIN32_EXECUTABLE true)
+endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
@@ -75,6 +81,16 @@ target_link_libraries(${PROJECT_NAME}
         Qt5::Widgets
         Qt5::OpenGL
 )
+
+# Linux CUDA/Qt5
+# see https://gitlab.kitware.com/cmake/cmake/issues/16915
+if ( TARGET Qt5::Core )
+    get_property( core_options TARGET Qt5::Core PROPERTY INTERFACE_COMPILE_OPTIONS )
+    string( REPLACE "-fPIC" "" new_core_options "${core_options}" )
+    set_property( TARGET Qt5::Core PROPERTY INTERFACE_COMPILE_OPTIONS ${new_core_options} )
+    set_property( TARGET Qt5::Core PROPERTY INTERFACE_POSITION_INDEPENDENT_CODE "ON" )
+    set( CMAKE_CXX_COMPILE_OPTIONS_PIE "-fPIC" )
+endif()
 
 ############################
 # Copy .dll's
